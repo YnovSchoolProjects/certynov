@@ -35,10 +35,10 @@ const actions = {
         const options = { from: account};
         store.commit('INIT', { account });
 
-        contracts.forEach((contract, contractName) => {
+        for (let [contract, contractName] of Object.entries(contracts)) {
           const contractInstance = new web3.eth.Contract(contract.abi, contract.address, options);
           store.commit('ADD_CONTRACT', { name: contractName, instance: contractInstance});
-        });
+        }
       } catch (error) {
         console.log(error)
       }
