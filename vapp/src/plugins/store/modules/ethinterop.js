@@ -2,13 +2,17 @@ import Web3 from 'web3';
 
 const ethState = {
   accounts: [],
+  contracts: {},
   initialized: false,
 };
 
 const mutations = {
-  INIT: (state, { accounts }) => {
-    state.accounts = accounts;
+  INIT: (state, { account }) => {
+    state.account = account;
     state.initialized = true;
+  },
+  ADD_CONTRACT: (state, { name, instance }) => {
+    state.contracts[name] = instance;
   },
 };
 
@@ -23,20 +27,20 @@ const actions = {
       const web3 = new Web3(ethereum);
 
       try {
-        await ethereum.enable();
-        const accounts= await web3.eth.getAccounts();
-        store.commit('INIT', { accounts });
+        const contracts = this._vm.$contracts;
 
-        // var myContract = new web3.eth.Contract(abi,contractAddress);
-        // myContract.methods.RegisterInstructor('11','Ali')
-        //   .send(option,function(error,result){
-        //     if (! error)
-        //       console.log(result);
-        //     else
-        //       console.log(error);
-        //   });
+        await ethereum.enable();
+        const [account] = await web3.eth.getAccounts();
+
+        const options = { from: account};
+        store.commit('INIT', { account });
+
+        contracts.forEach((contract, contractName) => {
+          const contractInstance = new web3.eth.Contract(contract.abi, contract.address, options);
+          store.commit('ADD_CONTRACT', { name: contractName, instance: contractInstance});
+        });
       } catch (error) {
-        throw Error('Access denied error.')
+        console.log(error)
       }
     }
   },
