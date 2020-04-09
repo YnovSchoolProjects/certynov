@@ -1,25 +1,10 @@
 <template>
-  <div v-if="isDrizzleInitialized" id="app">
+  <div v-if="isInitialized" id="app">
     <img alt="Vue logo" src="./assets/logo.png" />
 
     <div class="section">
-      <h2>Show the Accounts</h2>
-      <drizzle-account units="Ether" :precision="2" />
-    </div>
-
-    <div class="section">
-      <h2>Tutorial Token</h2>
-      <TutorialToken />
-    </div>
-
-    <div class="section">
       <h2>Simple Storage</h2>
-      <SimpleStorage />
-    </div>
-
-    <div class="section">
-      <h2>Complex Storage</h2>
-      <ComplexStorage />
+      <CertificateStore />
     </div>
   </div>
 
@@ -27,20 +12,19 @@
 </template>
 
 <script>
-import TutorialToken from './TutorialToken'
-import SimpleStorage from './SimpleStorage'
-import ComplexStorage from './ComplexStorage'
+import CertificateStore from './CertificateStore'
 import { mapGetters } from 'vuex'
 
 export default {
   name: 'app',
+  created() {
+    this.$store.dispatch('eth/initStore');
+  },
   components: {
-    ComplexStorage,
-    TutorialToken,
-    SimpleStorage
+    CertificateStore
   },
 
-  computed: mapGetters('drizzle', ['isDrizzleInitialized'])
+  computed: mapGetters('eth', ['isInitialized'])
 }
 </script>
 
