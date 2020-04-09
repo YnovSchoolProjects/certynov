@@ -1,7 +1,6 @@
 <template>
   <div class="">
-    <span>salut</span>
-    <span>{{ getAccounts}}</span>
+    <span>{{ getAccount }}</span>
   </div>
 </template>
 
@@ -11,7 +10,7 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'CertificateStore',
 
-  computed: mapGetters('eth', ['getAccounts'])
+  computed: mapGetters('eth', ['getAccount'])
 }
 </script>
 

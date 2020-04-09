@@ -47,7 +47,7 @@ const actions = {
 };
 
 const getters = {
-  getAccounts: state => state.account,
+  getAccount: state => state.account,
   isInitialized: state => state.initialized,
 };
 
