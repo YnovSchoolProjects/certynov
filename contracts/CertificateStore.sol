@@ -103,7 +103,7 @@ contract CertificateStore is Ownable {
         uint[] memory _ownedCertificates = new uint[](certificateCount[msg.sender]);
         uint current = 0;
 
-        for (uint i = 0; i <= certificates.length && current != _ownedCertificates.length - 1; i++) {
+        for (uint i = 0; i < certificates.length && current < _ownedCertificates.length; i++) {
             if (certificates[i].owner == msg.sender) {
                 _ownedCertificates[current] = i;
                 current++;
