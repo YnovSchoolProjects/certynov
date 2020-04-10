@@ -24,12 +24,39 @@ contract CertificateStore is Ownable {
     mapping(address => uint) internal certificateCount;
     mapping(address => uint) internal issuedCertificateCount;
 
-    modifier isTrustedIssuer() {
-        require(trustedIssuer[msg.sender] == true, 'Issuer is not trusted.');
+    /**
+    * @dev Add a new trusted issuer
+    */
+    function addIssuer(address _issuer) public onlyOwner {
+        trustedIssuer[_issuer] = true;
+    }
+
+    /**
+    * @dev Revoke an existing issuer
+    */
+    function revokeIssuer(address _issuer) public onlyOwner {
+        trustedIssuer[_issuer] = false;
+    }
+
+    /**
+    * @dev Returns true if the caller is a trusted issuer
+    */
+    function isTrustedIssuer() public view returns (bool isTrusted) {
+        return trustedIssuer[msg.sender];
+    }
+
+    /**
+    * @dev Throws if called by any account other than a trusted issuer.
+    */
+    modifier onlyTrustedIssuer() {
+        require(isTrustedIssuer(), 'Issuer is not trusted.');
         _;
     }
 
-    function issueCertificate(address _owner, string calldata _title, string calldata _certHash) external isTrustedIssuer {
+    /**
+    * @dev Issue a new certificate from input data (only trusted issuer)
+    */
+    function issueCertificate(address _owner, string memory _title, string memory _certHash) public onlyTrustedIssuer {
         Certificate memory certificate = Certificate(msg.sender, _owner, _title, _certHash, now);
 
         uint id = certificates.push(certificate);
@@ -41,11 +68,10 @@ contract CertificateStore is Ownable {
         emit CertificateStored(id, _title);
     }
 
-    function addIssuer(address _issuer) external onlyOwner {
-        trustedIssuer[_issuer] = true;
-    }
-
-    function authenticateHash(string calldata _certHash, address _pretendedOwner) external view returns (bool, Certificate memory) {
+    /**
+    * @dev Returns true and the certificate if the given certificate hash and the pretended owner match
+    */
+    function authenticateHash(string memory _certHash, address _pretendedOwner) public view returns (bool authenticated, Certificate memory authenticatedCertificate) {
         uint certId = certificateHashToCertificate[_certHash];
         Certificate memory emptyCert = Certificate(msg.sender, msg.sender, '', '', now);
 
@@ -62,19 +88,22 @@ contract CertificateStore is Ownable {
         return (true, foundCertificate);
     }
 
-    function getOwnedCertificates() external view returns (Certificate[] memory) {
-        Certificate[] memory ownedCertificates = new Certificate[](certificateCount[msg.sender]);
+    /**
+    * @dev Returns certificates owned by the caller
+    */
+    function getOwnedCertificates() public view returns (Certificate[] memory ownedCertificates) {
+        Certificate[] memory _ownedCertificates = new Certificate[](certificateCount[msg.sender]);
         uint current = 0;
         uint certificateLength = certificates.length;
-        uint ownedLimit = ownedCertificates.length - 1;
+        uint ownedLimit = _ownedCertificates.length - 1;
 
         for (uint i = 0; i <= certificateLength && current != ownedLimit; i++) {
             if (certificates[i].owner == msg.sender) {
-                ownedCertificates[current] = certificates[i];
+                _ownedCertificates[current] = certificates[i];
                 current++;
             }
         }
 
-        return ownedCertificates;
+        return _ownedCertificates;
     }
 }
