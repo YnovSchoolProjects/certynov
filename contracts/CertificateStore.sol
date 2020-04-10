@@ -71,35 +71,36 @@ contract CertificateStore is Ownable {
     /**
     * @dev Returns true and the certificate if the given certificate hash and the pretended owner match
     */
-    function authenticateHash(string memory _certHash, address _pretendedOwner) public view returns (bool authenticated, Certificate memory authenticatedCertificate) {
+    function authenticateHash(string memory _certHash, address _pretendedOwner) public view returns (bool authenticated, uint authenticatedCertificateId) {
+        Certificate memory foundCertificate;
         uint certId = certificateHashToCertificate[_certHash];
-        Certificate memory emptyCert = Certificate(msg.sender, msg.sender, '', '', now);
 
+        // invalid hash
         if(certId == 0) {
-            return (false, emptyCert);
+            return (false, 0);
         }
 
-        Certificate memory foundCertificate = certificates[certId];
+        foundCertificate = certificates[certId];
+        return (_pretendedOwner == foundCertificate.owner, certId);
+    }
 
-        if(foundCertificate.owner != _pretendedOwner) {
-            return (false, emptyCert);
-        }
-
-        return (true, foundCertificate);
+    /**
+    * @dev Return certificate matching th given id;
+    */
+    function getCertificateById(uint _certId) public view returns(Certificate memory allCertificates) {
+        return certificates[_certId];
     }
 
     /**
     * @dev Returns certificates owned by the caller
     */
-    function getOwnedCertificates() public view returns (Certificate[] memory ownedCertificates) {
-        Certificate[] memory _ownedCertificates = new Certificate[](certificateCount[msg.sender]);
+    function getOwnedCertificatesId() public view returns (uint[] memory ownedCertificates) {
+        uint[] memory _ownedCertificates = new uint[](certificateCount[msg.sender]);
         uint current = 0;
-        uint certificateLength = certificates.length;
-        uint ownedLimit = _ownedCertificates.length - 1;
 
-        for (uint i = 0; i <= certificateLength && current != ownedLimit; i++) {
+        for (uint i = 0; i <= certificates.length && current != _ownedCertificates.length - 1; i++) {
             if (certificates[i].owner == msg.sender) {
-                _ownedCertificates[current] = certificates[i];
+                _ownedCertificates[current] = i;
                 current++;
             }
         }
