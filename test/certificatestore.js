@@ -76,8 +76,22 @@ contract("Certificate Store", async accounts => {
       await instance.issueCertificate(accounts[1], 'test certificate', 'a hashed certificate content', { from: accounts[0] });
 
       const authResult = await instance.authenticateHash.call('a hashed certificate content', accounts[2], { from: accounts[0] });
+
       assert.isFalse(authResult.authenticated);
       assert.equal(authResult.authenticatedCertificateId, 0);
+    });
+
+    it('should authenticate an valid certificate', async () => {
+      const instance = await CertificateStore.deployed();
+
+      await instance.issueCertificate(accounts[1], 'test certificate', 'a hashed certificate content', { from: accounts[0] });
+
+      const authResult = await instance.authenticateHash.call('a hashed certificate content', accounts[1], { from: accounts[0] });
+
+      assert.isTrue(authResult.authenticated);
+
+      const certificate = await instance.getCertificateById.call(authResult.authenticatedCertificateId);
+      assert.equal(certificate.title, 'test certificate');
     });
   });
 });

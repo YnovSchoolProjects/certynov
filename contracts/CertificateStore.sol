@@ -12,6 +12,7 @@ contract CertificateStore is Ownable {
         string title;
         string certificateHash;
         uint256 issuedAt;
+        bool exist;
     }
 
     // All the issued certificates
@@ -23,6 +24,10 @@ contract CertificateStore is Ownable {
     // Number of owned certificates and issued certificates
     mapping(address => uint) internal certificateCount;
     mapping(address => uint) internal issuedCertificateCount;
+
+    constructor() public {
+        _forgeCertificate(owner(), owner(), 'ORIGINAL_CERTIFICATE', 'ORIGINAL_CERTIFICATE');
+    }
 
     /**
     * @dev Add a new trusted issuer
@@ -53,35 +58,35 @@ contract CertificateStore is Ownable {
         _;
     }
 
-    /**
-    * @dev Issue a new certificate from input data (only trusted issuer)
-    */
-    function issueCertificate(address _owner, string memory _title, string memory _certHash) public onlyTrustedIssuer {
-        Certificate memory certificate = Certificate(msg.sender, _owner, _title, _certHash, now);
-
-        uint id = certificates.push(certificate);
+    function _forgeCertificate(address _issuer, address _owner, string memory _title, string memory _certHash) internal returns (uint certificateId) {
+        Certificate memory certificate = Certificate(_issuer, _owner, _title, _certHash, now, true);
+        uint id = certificates.push(certificate) - 1;
         certificateHashToCertificate[_certHash] = id;
 
         certificateCount[_owner]++;
         issuedCertificateCount[msg.sender]++;
 
-        emit CertificateStored(id, _title);
+        return id;
     }
 
     /**
-    * @dev Returns true and the certificate if the given certificate hash and the pretended owner match
+    * @dev Issue a new certificate from input data (only trusted issuer)
+    */
+    function issueCertificate(address _owner, string memory _title, string memory _certHash) public onlyTrustedIssuer {
+        uint certId = _forgeCertificate(msg.sender, _owner, _title, _certHash);
+        emit CertificateStored(certId, _title);
+    }
+
+    /**
+    * @dev Returns true and the certificate id if the given certificate hash and the pretended owner match
     */
     function authenticateHash(string memory _certHash, address _pretendedOwner) public view returns (bool authenticated, uint authenticatedCertificateId) {
-        Certificate memory foundCertificate;
         uint certId = certificateHashToCertificate[_certHash];
 
-        // invalid hash
-        if(certId == 0) {
-            return (false, 0);
+        if(certificates[certId].exist == true && certificates[certId].owner == _pretendedOwner) {
+            return (true, certId);
         }
-
-        foundCertificate = certificates[certId];
-        return (_pretendedOwner == foundCertificate.owner, certId);
+        return (false, 0);
     }
 
     /**
