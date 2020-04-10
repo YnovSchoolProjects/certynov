@@ -20,7 +20,7 @@ const actions = {
   async initStore(store) {
     if (!store.state.initialized) {
       if (!window.ethereum) {
-        throw Error('unable to find ethereum module');
+        throw Error('unable to find ethereum module, install MetaMask or use Brave Browser');
       }
 
       const ethereum = window.ethereum;
@@ -32,10 +32,10 @@ const actions = {
         await ethereum.enable();
         const [account] = await web3.eth.getAccounts();
 
-        const options = { from: account};
+        const options = { from: account };
         store.commit('INIT', { account });
 
-        for (let [contract, contractName] of Object.entries(contracts)) {
+        for (let [contractName, contract] of Object.entries(contracts)) {
           const contractInstance = new web3.eth.Contract(contract.abi, contract.address, options);
           store.commit('ADD_CONTRACT', { name: contractName, instance: contractInstance});
         }
@@ -48,6 +48,7 @@ const actions = {
 
 const getters = {
   getAccount: state => state.account,
+  getContracts: state => state.contracts,
   isInitialized: state => state.initialized,
 };
 

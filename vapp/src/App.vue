@@ -18,7 +18,9 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'app',
   created() {
-    this.$store.dispatch('eth/initStore');
+    this.$store.dispatch('eth/initStore').then(() => {
+      this.$store.dispatch('certs/initStore');
+    });
   },
   components: {
     CertificateStore
