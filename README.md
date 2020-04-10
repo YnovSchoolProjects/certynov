@@ -60,3 +60,6 @@ yarn serve
 
 you can now access application at `http://localhost:8080`.
 Dont forget to setup your MetaMask network and account with one of the key given in truffle develop output
+
+You can install the `Vue devtool` plugin for [Chrome](https://chrome.google.com/webstore/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) or [Firefox](https://addons.mozilla.org/fr/firefox/addon/vue-js-devtools/) to debug `Vuex` store, state and other.
+###### Press `F12` and go to `Vue` tabs
