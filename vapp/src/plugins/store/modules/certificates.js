@@ -1,3 +1,5 @@
+import Certificate from "../../../services/Certificate";
+
 const ethState = {
   ownedCertificates: [],
   initialized: false,
@@ -19,9 +21,15 @@ const actions = {
 
     if (!state.initialized) {
       const { CertificateStore: CertificateContract } = await rootGetters['eth/getContracts'];
+      const certificates = [];
 
-      const ownedCertificates = await CertificateContract.methods.getOwnedCertificates().call();
-      commit('INIT', { certificates: ownedCertificates });
+      const ownedCertificatesIds = await CertificateContract.methods.getOwnedCertificatesId().call();
+      for (let certId of ownedCertificatesIds) {
+        let certificate = await CertificateContract.methods.getCertificateById(certId).call();
+        certificates.push(new Certificate(certificate));
+      }
+
+      commit('INIT', { certificates });
     }
   },
 };
