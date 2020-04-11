@@ -1,7 +1,8 @@
 import Web3 from 'web3';
+import certificatesModule from "./certificates";
 
 const ethState = {
-  accounts: [],
+  account: null,
   contracts: {},
   initialized: false,
 };
@@ -37,8 +38,10 @@ const actions = {
 
         for (let [contractName, contract] of Object.entries(contracts)) {
           const contractInstance = new web3.eth.Contract(contract.abi, contract.address, options);
-          store.commit('ADD_CONTRACT', { name: contractName, instance: contractInstance});
+          store.commit('ADD_CONTRACT', { name: contractName, instance: contractInstance });
         }
+
+        await store.dispatch('certs/initStore');
       } catch (error) {
         console.log(error)
       }
@@ -47,6 +50,7 @@ const actions = {
 };
 
 const getters = {
+  hasAccount: state => state.account !== null,
   getAccount: state => state.account,
   getContracts: state => state.contracts,
   isInitialized: state => state.initialized,
@@ -58,4 +62,7 @@ export default {
   mutations,
   actions,
   getters,
+  modules:{
+    certs: certificatesModule,
+  },
 };

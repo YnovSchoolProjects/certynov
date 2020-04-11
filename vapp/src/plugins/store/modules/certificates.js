@@ -1,15 +1,21 @@
-import Certificate from "../../../services/Certificate";
+import { CertificateApi } from "../../../services/Certificate";
 
 const ethState = {
+  ownedRoles: [],
   ownedCertificates: [],
+  certificateApi: null,
   initialized: false,
 };
 
 const mutations = {
-  INIT: (state, { certificates }) => {
+  INIT: (state, { certificates, roles }) => {
+    state.ownedRoles = roles;
     state.ownedCertificates = certificates;
     state.initialized = true;
   },
+  API: (state, { certificateApi }) => {
+    state.certificateApi = certificateApi;
+  }
 };
 
 const actions = {
@@ -21,22 +27,23 @@ const actions = {
 
     if (!state.initialized) {
       const { CertificateStore: CertificateContract } = await rootGetters['eth/getContracts'];
-      const certificates = [];
+      const certificateApi = new CertificateApi(CertificateContract);
+      commit('API', { certificateApi });
 
-      const ownedCertificatesIds = await CertificateContract.methods.getOwnedCertificatesId().call();
-      for (let certId of ownedCertificatesIds) {
-        let certificate = await CertificateContract.methods.getCertificateById(certId).call();
-        certificates.push(new Certificate(certificate));
-      }
+      const roles = await certificateApi.fetchOwnedRoles();
+      const certificates = await certificateApi.fetchOwnedCertificates();
 
-      commit('INIT', { certificates });
+      commit('INIT', { certificates, roles });
     }
   },
 };
 
 const getters = {
+  getOwnedRoles: state => state.ownedRoles,
   getOwnedCertificates: state => state.ownedCertificates,
   isInitialized: state => state.initialized,
+  isOwner: state => state.ownedRoles.includes('owner'),
+  isIssuer: state => state.ownedRoles.includes('issuer'),
 };
 
 export default {
