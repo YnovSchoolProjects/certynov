@@ -2,7 +2,7 @@
   <MdApp>
     <MdAppToolbar>
       <div class="md-toolbar-section-start">
-        <span class="md-display-1">CertifY</span>
+        <span class="md-display-1"><img :src="require('./assets/logo.svg')" alt="logo" class="certify-logo" />CertifY</span>
       </div>
       <div class="md-toolbar-section-end">
         <span>
@@ -44,3 +44,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+  .certify-logo {
+    width: 2.5vw;
+    height: 2.5vw;
+    margin-right: 0.5vw;
+  }
+</style>
