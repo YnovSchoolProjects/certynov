@@ -54,6 +54,10 @@ const router = new VueRouter({
         requireRole: 'issuer',
       }
     },
+    {
+      path: '*',
+      redirect: { name: 'authenticate' },
+    },
   ],
 });
 
