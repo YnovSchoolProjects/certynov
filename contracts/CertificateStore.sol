@@ -27,4 +27,11 @@ contract CertificateStore is CertificateStoreCore {
 
         return _ownedCertificates;
     }
+
+    /**
+    * @dev Returns all issuers
+    */
+    function getIssuers() public view onlyOwner returns (Issuer[] memory) {
+        return issuers;
+    }
 }

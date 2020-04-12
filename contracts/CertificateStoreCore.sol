@@ -16,7 +16,7 @@ contract CertificateStoreCore is Ownable {
     }
 
     struct Certificate {
-        Issuer issuer;
+        address issuer;
         address owner;
         string title;
         string certificateHash;
@@ -26,30 +26,30 @@ contract CertificateStoreCore is Ownable {
 
     // All the issued certificates
     Certificate[] public certificates;
+    Issuer[] internal issuers;
+
     // A way to fetch certificates through its hash
     mapping(string => uint) internal certificateHashToCertificate;
-    // issuers is a mapping on order to disable the right to issue certificate to an entity
-    mapping(address => Issuer) internal issuers;
+    mapping(address => uint) internal issuersMapping;
+
     // Number of owned certificates and issued certificates
     mapping(address => uint) internal certificateCount;
     mapping(address => uint) internal issuedCertificateCount;
 
     constructor() public {
         Issuer memory issuer = _forgeIssuer(owner(), 'CertifY');
-        _forgeCertificate(issuer, owner(), 'ORIGINAL_CERTIFICATE', 'ORIGINAL_CERTIFICATE');
+        _forgeCertificate(issuer.issuer, owner(), 'ORIGINAL_CERTIFICATE', 'ORIGINAL_CERTIFICATE');
     }
 
     /**
     * @dev Add a new trusted issuer
     */
     function addIssuer(address _issuer, string memory _organization) public onlyOwner {
-        if(issuers[_issuer].exist) {
-            issuers[_issuer].trusted = true;
+        if(issuers[issuersMapping[_issuer]].exist) {
+            issuers[issuersMapping[_issuer]].trusted = true;
         } else {
             Issuer memory _newIssuer = _forgeIssuer(_issuer, _organization);
             _newIssuer.trusted = true;
-
-            issuers[_issuer] = _newIssuer;
         }
 
         emit TrustedIssuer(_issuer, _organization);
@@ -59,12 +59,10 @@ contract CertificateStoreCore is Ownable {
     * @dev Revoke an existing issuer
     */
     function revokeIssuer(address _issuer, string memory _organization) public onlyOwner {
-        if(issuers[_issuer].exist) {
-            issuers[_issuer].trusted = false;
+        if(issuers[issuersMapping[_issuer]].exist) {
+            issuers[issuersMapping[_issuer]].trusted = false;
         } else {
-            Issuer memory _newIssuer = _forgeIssuer(_issuer, _organization);
-
-            issuers[_issuer] = _newIssuer;
+            _forgeIssuer(_issuer, _organization);
         }
 
         emit UntrustedIssuer(_issuer, _organization);
@@ -74,7 +72,7 @@ contract CertificateStoreCore is Ownable {
     * @dev Returns true if the caller is a trusted issuer
     */
     function isTrustedIssuer() public view returns (bool isTrusted) {
-        return issuers[msg.sender].trusted;
+        return issuers[issuersMapping[msg.sender]].trusted;
     }
 
     /**
@@ -88,14 +86,18 @@ contract CertificateStoreCore is Ownable {
     /**
     * Create an untrusted issuer.
     */
-    function _forgeIssuer(address _issuer, string memory _organization) pure internal returns (Issuer memory newIssuer) {
-        return Issuer(_issuer, _organization, false, true);
+    function _forgeIssuer(address _issuer, string memory _organization) internal returns (Issuer memory) {
+        Issuer memory newIssuer = Issuer(_issuer, _organization, false, true);
+        uint id = issuers.push(newIssuer) - 1;
+        issuersMapping[_issuer] = id ;
+
+        return newIssuer;
     }
 
     /**
     * Create a certificate, do some magic and return its id.
     */
-    function _forgeCertificate(Issuer memory _issuer, address _owner, string memory _title, string memory _certHash) internal returns (uint certificateId) {
+    function _forgeCertificate(address _issuer, address _owner, string memory _title, string memory _certHash) internal returns (uint certificateId) {
         Certificate memory certificate = Certificate(_issuer, _owner, _title, _certHash, now, true);
         uint id = certificates.push(certificate) - 1;
         certificateHashToCertificate[_certHash] = id;
@@ -110,7 +112,7 @@ contract CertificateStoreCore is Ownable {
     * @dev Issue a new certificate from input data (only trusted issuer)
     */
     function issueCertificate(address _owner, string memory _title, string memory _certHash) public onlyTrustedIssuer {
-        uint certId = _forgeCertificate(issuers[msg.sender], _owner, _title, _certHash);
+        uint certId = _forgeCertificate(issuers[issuersMapping[msg.sender]].issuer, _owner, _title, _certHash);
         emit CertificateStored(certId, _title);
     }
 
