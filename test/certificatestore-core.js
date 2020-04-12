@@ -8,6 +8,23 @@ contract("Certificate Store : Core", async accounts => {
   });
 
   describe('issuer trust process', async () => {
+    it('should not be able to revoke issuer if not owner', async () => {
+      const instance = await CertificateStore.deployed();
+
+      try {
+        await instance.revokeIssuer(accounts[0], 'CertifY', { from: accounts[1] });
+      } catch (e) {
+        assert.include(e.message, 'Ownable: caller is not the owner');
+      }
+    });
+
+    it('should be able to revoke an issuer if owner', async () => {
+      const instance = await CertificateStore.deployed();
+
+      await instance.revokeIssuer(accounts[0], 'CertifY', { from: accounts[0] });
+      assert.equal(await  instance.isTrustedIssuer.call({ from: accounts[0] }), false);
+    });
+
     it('should not be able to add a new issuer if not owner', async () => {
       const instance = await CertificateStore.deployed();
 
