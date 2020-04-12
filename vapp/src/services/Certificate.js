@@ -9,17 +9,16 @@ export class Certificate {
 }
 
 export class CertificateApi {
-  constructor(certificateContract, helperContract) {
+  constructor(certificateContract) {
     this.certificateContract = certificateContract;
-    this.helperContract = helperContract;
   }
 
   async fetchOwnedCertificates() {
     const certificates = [];
 
-    const ownedCertificatesIds = await this.helperContract.methods.getOwnedCertificatesId().call();
+    const ownedCertificatesIds = await this.certificateContract.methods.getOwnedCertificatesId().call() || [];
     for (let certId of ownedCertificatesIds) {
-      let certificate = await this.helperContract.methods.getCertificateById(certId).call();
+      let certificate = await this.certificateContract.methods.getCertificateById(certId).call();
       certificates.push(new Certificate(certificate));
     }
 
