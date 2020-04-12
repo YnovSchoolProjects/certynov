@@ -24,5 +24,8 @@ jobs:
 
       - run: yarn global add truffle
 
+      - name: trfueel version
+        run: $(yarn global bin)/truffle version
+
       - name: test contracts
-        run: truffle test
+        run: $(yarn global bin)/truffle test
