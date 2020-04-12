@@ -12,7 +12,7 @@ contract("Certificate Store", async accounts => {
       const instance = await CertificateStore.deployed();
 
       try {
-        await instance.addIssuer(accounts[0], { from: accounts[1] });
+        await instance.addIssuer(accounts[0], 'CertifY', { from: accounts[1] });
       } catch (e) {
         assert.include(e.message, 'Ownable: caller is not the owner');
       }
@@ -21,7 +21,7 @@ contract("Certificate Store", async accounts => {
     it('should be able to add a new issuer if owner', async () => {
       const instance = await CertificateStore.deployed();
 
-      await instance.addIssuer(accounts[0], { from: accounts[0] });
+      await instance.addIssuer(accounts[0], 'CertifY', { from: accounts[0] });
       assert.equal(await  instance.isTrustedIssuer.call({ from: accounts[0] }), true);
     });
   });

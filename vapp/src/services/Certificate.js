@@ -9,16 +9,17 @@ export class Certificate {
 }
 
 export class CertificateApi {
-  constructor(contract) {
-    this.contract = contract;
+  constructor(certificateContract, helperContract) {
+    this.certificateContract = certificateContract;
+    this.helperContract = helperContract;
   }
 
   async fetchOwnedCertificates() {
     const certificates = [];
 
-    const ownedCertificatesIds = await this.contract.methods.getOwnedCertificatesId().call();
+    const ownedCertificatesIds = await this.helperContract.methods.getOwnedCertificatesId().call();
     for (let certId of ownedCertificatesIds) {
-      let certificate = await this.contract.methods.getCertificateById(certId).call();
+      let certificate = await this.helperContract.methods.getCertificateById(certId).call();
       certificates.push(new Certificate(certificate));
     }
 
@@ -28,8 +29,8 @@ export class CertificateApi {
   async fetchOwnedRoles() {
     const roles = [];
 
-    const isOwner = await this.contract.methods.isOwner().call();
-    const isIssuer = await this.contract.methods.isTrustedIssuer().call();
+    const isOwner = await this.certificateContract.methods.isOwner().call();
+    const isIssuer = await this.certificateContract.methods.isTrustedIssuer().call();
 
     if (isOwner) {
       roles.push('owner');
@@ -40,5 +41,13 @@ export class CertificateApi {
     }
 
     return roles;
+  }
+
+  async fetchIssuers() {
+    const issuers = [];
+
+
+
+    return issuers;
   }
 }

@@ -26,8 +26,8 @@ const actions = {
     }
 
     if (!state.initialized) {
-      const { CertificateStore: CertificateContract } = await rootGetters['eth/getContracts'];
-      const certificateApi = new CertificateApi(CertificateContract);
+      const { CertificateStore: CertificateContract, CertificateStoreHelpers: HelperContract } = await rootGetters['eth/getContracts'];
+      const certificateApi = new CertificateApi(CertificateContract, HelperContract);
       commit('API', { certificateApi });
 
       const roles = await certificateApi.fetchOwnedRoles();
