@@ -1,5 +1,5 @@
 {
-  "name": "drizzle-vue-box",
+  "name": "certify",
   "version": "0.0.1",
   "description": "",
   "main": "truffle-config.js",
@@ -7,15 +7,15 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "truffle test"
   },
   "keywords": [],
   "author": {
-    "name": "Amal Sudama",
-    "email": "amal@trufflesuite.com",
-    "url": "http://github.com/truffle-box/drizzle-vue-box"
+    "name": "Guillaume Marmorat",
+    "email": "guillaume.marmorat@gmail.com",
+    "url": "http://github.com/certify/certify"
   },
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "openzeppelin-solidity": "^2.1.1"
   }

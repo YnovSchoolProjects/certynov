@@ -8,6 +8,14 @@ export class Certificate {
   }
 }
 
+export class Issuer {
+  constructor([address, organization, trusted]) {
+    this.address = address;
+    this.organization = organization;
+    this.trusted = trusted;
+  }
+}
+
 export class CertificateApi {
   constructor(certificateContract) {
     this.certificateContract = certificateContract;
@@ -44,9 +52,22 @@ export class CertificateApi {
 
   async fetchIssuers() {
     const issuers = [];
+    const fetched = await this.certificateContract.methods.getIssuers().call() || [];
 
-
+    for (let issuer of fetched) {
+      issuers.push(new Issuer(issuer));
+    }
 
     return issuers;
+  }
+
+  async setTrustStatus(issuer) {
+    if (issuer.trusted) {
+      const result = await this.certificateContract.methods.addIssuer(issuer.address, issuer.organization).send();
+      console.log('trusted', result);
+    } else {
+      const result = await this.certificateContract.methods.revokeIssuer(issuer.address, issuer.organization).send();
+      console.log('untrusted', result);
+    }
   }
 }
