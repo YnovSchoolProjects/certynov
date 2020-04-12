@@ -63,11 +63,9 @@ export class CertificateApi {
 
   async setTrustStatus(issuer) {
     if (issuer.trusted) {
-      const result = await this.certificateContract.methods.addIssuer(issuer.address, issuer.organization).send();
-      console.log('trusted', result);
+      await this.certificateContract.methods.addIssuer(issuer.address, issuer.organization).send();
     } else {
-      const result = await this.certificateContract.methods.revokeIssuer(issuer.address, issuer.organization).send();
-      console.log('untrusted', result);
+      await this.certificateContract.methods.revokeIssuer(issuer.address, issuer.organization).send();
     }
   }
 }
