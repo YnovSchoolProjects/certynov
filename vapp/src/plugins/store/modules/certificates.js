@@ -1,4 +1,5 @@
 import { CertificateApi } from "../../../services/Certificate";
+import {Result} from "../../../services/Result";
 
 const ethState = {
   ownedRoles: [],
@@ -71,6 +72,16 @@ const actions = {
     }
 
     return result;
+  },
+  async authenticateCertificate({ state }, certificateData) {
+    const authResult = await state.certificateApi.authenticateCertificate(certificateData);
+
+    if (authResult.authenticated) {
+      const certificate = await state.certificateApi.fetchCertificate(authResult.authenticatedCertificateId);
+      return new Result(true, certificate);
+    }
+
+    return new Result(false);
   }
 };
 

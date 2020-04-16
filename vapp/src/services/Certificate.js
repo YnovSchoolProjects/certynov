@@ -1,4 +1,5 @@
-import {Result} from "./Result";
+import { Result } from "./Result";
+import { format, fromUnixTime } from 'date-fns';
 
 export class Certificate {
   constructor([ issuer, owner, title, hash, issuedAt ]) {
@@ -6,7 +7,7 @@ export class Certificate {
     this.owner = owner;
     this.title = title;
     this.hash = hash;
-    this.issuedAt = issuedAt;
+    this.issuedAt = format(fromUnixTime(issuedAt), 'dd/MM/yyyy');
   }
 }
 
@@ -23,16 +24,28 @@ export class CertificateApi {
     this.certificateContract = certificateContract;
   }
 
+  async authenticateCertificate({ hash, owner }) {
+    const authResult = await this.certificateContract.methods.authenticateHash(hash, owner).call();
+    console.log(authResult);
+
+    return authResult;
+  }
+
   async fetchOwnedCertificates() {
     const certificates = [];
 
     const ownedCertificatesIds = await this.certificateContract.methods.getOwnedCertificatesId().call() || [];
     for (let certId of ownedCertificatesIds) {
-      let certificate = await this.certificateContract.methods.getCertificateById(certId).call();
-      certificates.push(new Certificate(certificate));
+      let certificate = await this.fetchCertificate(certId);
+      certificates.push(certificate);
     }
 
     return certificates;
+  }
+
+  async fetchCertificate(certId) {
+    const certificate = await this.certificateContract.methods.getCertificateById(certId).call();
+    return new Certificate(certificate);
   }
 
   async fetchOwnedRoles() {
