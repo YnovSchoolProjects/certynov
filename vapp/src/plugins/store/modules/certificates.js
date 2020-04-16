@@ -63,9 +63,14 @@ const actions = {
       console.error('eth store is not initialized.');
       return;
     }
+    console.log(issuer);
+    const result = await state.certificateApi.setTrustStatus(issuer);
 
-    await state.certificateApi.setTrustStatus(issuer);
-    commit('TRUST_STATUS', { issuer });
+    if (result.status) {
+      commit('TRUST_STATUS', { issuer });
+    }
+
+    return result;
   }
 };
 

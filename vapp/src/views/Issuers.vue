@@ -13,7 +13,10 @@
                             <div class="md-layout">
                                 <div class="md-layout-item md-size-30"></div>
                                 <div class="md-layout-item md-size-15">
-                                    <MdButton class="md-icon-button md-raised md-primary add-button"><MdIcon>add</MdIcon></MdButton>
+                                    <MdButton class="md-icon-button md-raised md-primary add-button" @click="openIssuerModal">
+                                        <MdIcon>add</MdIcon>
+                                        <MdTooltip md-direction="left">Add issuer</MdTooltip>
+                                    </MdButton>
                                 </div>
                                 <div class="md-layout-item md-size-50">
                                     <md-field md-clearable>
@@ -28,11 +31,11 @@
                         <md-table-cell md-label="address">{{ issuer.address }}</md-table-cell>
                         <md-table-cell md-label="organization" md-sort-by="organization">{{ issuer.organization }}</md-table-cell>
                         <md-table-cell md-label="Actions">
-                            <MdButton v-if="!issuer.trusted" class="md-primary" @click="setTrusted(issuer)">
+                            <MdButton v-if="!issuer.trusted" class="md-primary" @click="saveIssuer(issuer, true)">
                                 <MdIcon>done</MdIcon>
                                 <MdTooltip md-direction="right">Trust issuer</MdTooltip>
                             </MdButton>
-                            <MdButton v-if="issuer.trusted" class="md-accent" @click="setUntrusted(issuer)">
+                            <MdButton v-if="issuer.trusted" class="md-accent" @click="saveIssuer(issuer, false)">
                                 <MdIcon>clear</MdIcon>
                                 <MdTooltip md-direction="right">Untrust issuer</MdTooltip>
                             </MdButton>
@@ -43,19 +46,30 @@
                 </md-table>
             </div>
         </div>
+        <IssuerModal ref="issuerModal" @new-issuer="issuer => saveIssuer(issuer)" />
+        <SnackBar ref="snackbar">
+            <span>{{ message }}</span>
+        </SnackBar>
     </div>
 </template>
 
 <script>
   import { mapGetters } from 'vuex';
+  import SnackBar from "../components/CYSnackBar";
+  import IssuerModal from "../components/CYIssuerModal";
 
   export default {
     name: "Issuer",
+    components: {
+      IssuerModal,
+      SnackBar,
+    },
     data() {
       return {
         search: null,
         searched: [],
         issuers: [],
+        message: '',
       };
     },
     mounted() {
@@ -77,14 +91,23 @@
       searchOnTable() {
         this.searched = this.issuers.filter((item) => this.filterItem(item, this.search));
       },
-      setTrusted(issuer) {
-        issuer.trusted = true;
-        this.$store.dispatch('eth/certs/setTrustStatus', issuer);
+      openIssuerModal() {
+        this.$refs.issuerModal.open();
       },
-      setUntrusted(issuer) {
-        issuer.trusted = false;
-        this.$store.dispatch('eth/certs/setTrustStatus', issuer);
-      },
+      saveIssuer(issuer, status = null) {
+        if (status === true) {
+          issuer.trusted = true
+        } else if (status === false) {
+          issuer.trusted = false;
+        }
+
+        this.$store.dispatch('eth/certs/setTrustStatus', issuer).then((result) => {
+          if (!result.status) {
+            this.message = result.data.message;
+            this.$refs.snackbar.open();
+          }
+        });
+      }
     },
   }
 </script>

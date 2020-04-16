@@ -1,3 +1,5 @@
+import {Result} from "./Result";
+
 export class Certificate {
   constructor([ issuer, owner, title, hash, issuedAt ]) {
     this.issuer = issuer;
@@ -62,10 +64,15 @@ export class CertificateApi {
   }
 
   async setTrustStatus(issuer) {
-    if (issuer.trusted) {
-      await this.certificateContract.methods.addIssuer(issuer.address, issuer.organization).send();
-    } else {
-      await this.certificateContract.methods.revokeIssuer(issuer.address, issuer.organization).send();
+    try {
+      if (issuer.trusted) {
+        await this.certificateContract.methods.addIssuer(issuer.address, issuer.organization).send();
+      } else {
+        await this.certificateContract.methods.revokeIssuer(issuer.address, issuer.organization).send();
+      }
+      return new Result(true);
+    } catch (e) {
+      return new Result(false, e);
     }
   }
 }
