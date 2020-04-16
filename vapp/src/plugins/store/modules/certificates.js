@@ -73,22 +73,13 @@ const actions = {
 
     return result;
   },
-  async authenticateCertificate({ state }, certificateData) {
-    const authResult = await state.certificateApi.authenticateCertificate(certificateData);
-
-    if (authResult.authenticated) {
-      const certificate = await state.certificateApi.fetchCertificate(authResult.authenticatedCertificateId);
-      return new Result(true, certificate);
-    }
-
-    return new Result(false);
-  }
 };
 
 const getters = {
   getOwnedRoles: state => state.ownedRoles,
   getOwnedCertificates: state => state.ownedCertificates,
   getIssuers: state => state.issuers,
+  getApi: state => state.certificateApi,
   isInitialized: state => state.initialized,
   isOwner: state => state.ownedRoles.includes('owner'),
   isIssuer: state => state.ownedRoles.includes('issuer'),

@@ -43,7 +43,7 @@ import { mapGetters } from 'vuex'
 import CYCertificate from "../components/CYCertificate";
 
 export default {
-    name: 'Authenticate',
+  name: 'Authenticate',
   components: {CYCertificateModal: CYCertificate},
   data() {
       return {
@@ -55,23 +55,22 @@ export default {
     },
     computed: {
       ...mapGetters('eth', ['getAccount']),
+      ...mapGetters('eth/certs', ['getApi']),
     },
   methods: {
-    authenticateCertificate() {
-      this.loading = true;
+    async authenticateCertificate() {
+      try {
+        this.loading = true;
+        const result = await this.getApi.authenticateCertificate({hash: this.hash, owner: this.address});
 
-      this.$store.dispatch('eth/certs/authenticateCertificate', { hash: this.hash, owner: this.address })
-        .then((result) => {
-          if (result.status) {
-            this.certificate = result.data;
-          }
-
-          this.loading = false;
-        })
-        .catch((error) => {
-          console.log(error);
-          this.loading = false;
-        });
+        if (result.status) {
+          this.certificate = result.data;
+        }
+      } catch (e) {
+        console.error(e)
+      } finally {
+        this.loading = false;
+      }
     },
   }
 }

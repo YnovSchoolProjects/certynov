@@ -24,11 +24,26 @@ export class CertificateApi {
     this.certificateContract = certificateContract;
   }
 
+  async issueCertificate({ hash, owner, title }) {
+    const issueResult = await this.certificateContract.methods.issueCertificate(owner, title, hash).send();
+
+    if (issueResult.status && issueResult.events['CertificateStored'] !== null) {
+      return new Result(true);
+    }
+
+    return new Result(false);
+  }
+
   async authenticateCertificate({ hash, owner }) {
     const authResult = await this.certificateContract.methods.authenticateHash(hash, owner).call();
     console.log(authResult);
 
-    return authResult;
+    if (authResult.authenticated) {
+      const certificate = await this.fetchCertificate(authResult.authenticatedCertificateId);
+      return new Result(true, certificate);
+    }
+
+    return new Result(false);
   }
 
   async fetchOwnedCertificates() {
