@@ -27,9 +27,6 @@
                         <md-button @click="authenticateCertificate">
                             Authenticate
                         </md-button>
-                        <md-button @click="auth">
-                            fill
-                        </md-button>
                     </div>
                 </div>
             </md-card-content>
@@ -76,14 +73,6 @@ export default {
           this.loading = false;
         });
     },
-    async auth() {
-      console.log(this.getAccount);
-      this.hash = 'ORIGINAL_CERTIFICATE';
-      this.address = this.getAccount;
-      this.$nextTick(() => {
-        this.authenticateCertificate();
-      });
-    }
   }
 }
 </script>
