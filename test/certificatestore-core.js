@@ -65,6 +65,17 @@ contract("Certificate Store : Core", async accounts => {
   });
 
   describe('certificate authentication process', async () => {
+    it('should not authenticate an invalid certificate : invalid hash root owner', async () => {
+      const instance = await CertificateStore.deployed();
+
+      await instance.issueCertificate(accounts[1], 'test certificate', 'a hashed certificate content', { from: accounts[0] });
+
+      const authResult = await instance.authenticateHash.call('a not valid certificate content', accounts[0], { from: accounts[0] });
+
+      assert.isFalse(authResult.authenticated);
+      assert.equal(authResult.authenticatedCertificateId, 0);
+    });
+
     it('should not authenticate an invalid certificate : invalid hash', async () => {
       const instance = await CertificateStore.deployed();
 

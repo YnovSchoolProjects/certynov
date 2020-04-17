@@ -2,6 +2,8 @@ pragma solidity >=0.5.0 <0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./StringUtils.sol";
+
 
 contract CertificateStoreCore is Ownable {
     event CertificateStored(uint _id, string _title);
@@ -123,8 +125,9 @@ contract CertificateStoreCore is Ownable {
     */
     function authenticateHash(string memory _certHash, address _pretendedOwner) public view returns (bool authenticated, uint authenticatedCertificateId) {
         uint certId = certificateHashToCertificate[_certHash];
+        Certificate memory matchingCert = certificates[certId];
 
-        if(certificates[certId].exist == true && certificates[certId].owner == _pretendedOwner) {
+        if(matchingCert.exist == true && StringUtils.equal(matchingCert.certificateHash, _certHash) && certificates[certId].owner == _pretendedOwner) {
             return (true, certId);
         }
         return (false, 0);
