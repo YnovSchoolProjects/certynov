@@ -54,12 +54,15 @@
                 </md-card-content>
             </md-card>
         </div>
+        <SnackBar ref="snackbar">
+            <span>{{ message }}</span>
+        </SnackBar>
     </div>
 </template>
 
 <script>
-  import { mapActions } from 'vuex';
   import { sha256 } from 'js-sha256';
+  import SnackBar from '../components/CYSnackBar.vue';
 
   const getDefault = () => ({
     file: null,
@@ -70,12 +73,16 @@
 
   export default {
     name: "IssueCertificate",
+    components: {
+      SnackBar
+    },
     data() {
       return {
         loading: false,
         hashing: false,
         fileList: null,
         certificate: getDefault(),
+        message: '',
       };
     },
     methods: {
@@ -87,7 +94,17 @@
         this.loading = true;
         const api = await this.$store.getters['eth/certs/getApi'];
         const result = await api.issueCertificate(this.certificate);
-        console.log(result);
+
+        this.loading = false;
+        if (result.status) {
+          this.message = `Successfully issued certificate : ${this.certificate.hash}`;
+          this.$refs.snackbar.open();
+        } else {
+          this.message = `Failed to issue certificate : ${result.data}`;
+          this.$refs.snackbar.open();
+        }
+
+        this.certificate = getDefault();
       },
       async fileEmitted(fileList) {
         this.hashing = true;
