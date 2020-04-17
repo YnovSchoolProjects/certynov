@@ -38,6 +38,8 @@ contract CertificateStoreCore is Ownable {
 
     constructor() public {
         Issuer memory issuer = _forgeIssuer(owner(), 'CertifY');
+        issuers[issuersMapping[owner()]].trusted = true;
+
         _forgeCertificate(issuer.issuer, owner(), 'ORIGINAL_CERTIFICATE', 'ORIGINAL_CERTIFICATE');
     }
 

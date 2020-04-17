@@ -39,7 +39,9 @@ const actions = {
 
     if (!state.initialized) {
       const { CertificateStore: CertificateContract } = await rootGetters['eth/getContracts'];
-      const certificateApi = new CertificateApi(CertificateContract);
+      const gasPrice = await rootGetters['eth/getGasPrice'];
+
+      const certificateApi = new CertificateApi(CertificateContract, gasPrice);
       commit('API', { certificateApi });
 
       const roles = await certificateApi.fetchOwnedRoles();
@@ -64,11 +66,11 @@ const actions = {
       console.error('eth store is not initialized.');
       return;
     }
-    console.log(issuer);
-    const result = await state.certificateApi.setTrustStatus(issuer);
+    const newIssuer = { ...issuer };
+    const result = await state.certificateApi.setTrustStatus(newIssuer);
 
     if (result.status) {
-      commit('TRUST_STATUS', { issuer });
+      commit('TRUST_STATUS', newIssuer);
     }
 
     return result;

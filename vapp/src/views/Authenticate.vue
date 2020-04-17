@@ -33,7 +33,7 @@
         </md-card>
         <div class="md-layout-item md-size-20"></div>
         <div class="md-layout-item md-size-60">
-            <CYCertificateModal v-if="certificate !== null" :certificate="certificate" />
+            <CYCertificate v-if="certificate !== null" :certificate="certificate" />
         </div>
     </div>
 </template>
@@ -41,10 +41,11 @@
 <script>
 import { mapGetters } from 'vuex'
 import CYCertificate from "../components/CYCertificate";
+import {Certificate} from "../services/Certificate";
 
 export default {
   name: 'Authenticate',
-  components: {CYCertificateModal: CYCertificate},
+  components: {CYCertificate },
   data() {
       return {
         hash: null,
@@ -65,6 +66,11 @@ export default {
 
         if (result.status) {
           this.certificate = result.data;
+        } else {
+          const falseCerts = new Certificate([null,this.address,null,this.hash,null]);
+          falseCerts.exist = false;
+
+          this.certificate = falseCerts;
         }
       } catch (e) {
         console.error(e)

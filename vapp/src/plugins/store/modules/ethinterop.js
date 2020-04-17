@@ -3,13 +3,15 @@ import certificatesModule from "./certificates";
 
 const ethState = {
   account: null,
+  gasPrice: '',
   contracts: {},
   initialized: false,
 };
 
 const mutations = {
-  INIT: (state, { account }) => {
+  INIT: (state, { account, gasPrice }) => {
     state.account = account;
+    state.gasPrice = gasPrice;
     state.initialized = true;
   },
   ADD_CONTRACT: (state, { name, instance }) => {
@@ -32,9 +34,10 @@ const actions = {
 
         await ethereum.enable();
         const [account] = await web3.eth.getAccounts();
+        const gasPrice = await web3.eth.getGasPrice();
 
         const options = { from: account };
-        store.commit('INIT', { account });
+        store.commit('INIT', { account, gasPrice });
 
         for (let [contractName, contract] of Object.entries(contracts)) {
           const contractInstance = new web3.eth.Contract(contract.abi, contract.address, options);
@@ -52,6 +55,7 @@ const actions = {
 const getters = {
   hasAccount: state => state.account !== null,
   getAccount: state => state.account,
+  getGasPrice: state => state.gasPrice,
   getContracts: state => state.contracts,
   isInitialized: state => state.initialized,
 };

@@ -79,14 +79,14 @@
       };
     },
     methods: {
-      ...mapActions('eth/certs', ['getApi']),
       reset() {
         this.certificate = getDefault();
         this.loading = false;
       },
       async issue() {
         this.loading = true;
-        const result = await this.getApi.issueCertificate(this.certificate);
+        const api = await this.$store.getters['eth/certs/getApi'];
+        const result = await api.issueCertificate(this.certificate);
         console.log(result);
       },
       async fileEmitted(fileList) {
@@ -94,8 +94,7 @@
         const file = fileList[0];
 
         try {
-            const fileContent = await this.getFileContent(file);
-          console.log(fileContent);
+          const fileContent = await this.getFileContent(file);
           this.certificate.hash = sha256(fileContent);
         } catch (e) {
           console.error(e);

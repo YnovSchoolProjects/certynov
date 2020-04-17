@@ -2,12 +2,13 @@ import { Result } from "./Result";
 import { format, fromUnixTime } from 'date-fns';
 
 export class Certificate {
-  constructor([ issuer, owner, title, hash, issuedAt ]) {
+  constructor([ issuer = '', owner = '', title = '', hash = '', issuedAt = null ]) {
     this.issuer = issuer;
     this.owner = owner;
     this.title = title;
     this.hash = hash;
-    this.issuedAt = format(fromUnixTime(issuedAt), 'dd/MM/yyyy');
+    this.issuedAt = issuedAt !== null ? format(fromUnixTime(issuedAt), 'dd/MM/yyyy') : format(new Date(), 'dd/MM/yyyy');
+    this.exist = true;
   }
 }
 
@@ -20,12 +21,13 @@ export class Issuer {
 }
 
 export class CertificateApi {
-  constructor(certificateContract) {
+  constructor(certificateContract, gasPrice) {
     this.certificateContract = certificateContract;
+    this.gasPrice = `${gasPrice}0`;
   }
 
   async issueCertificate({ hash, owner, title }) {
-    const issueResult = await this.certificateContract.methods.issueCertificate(owner, title, hash).send();
+    const issueResult = await this.certificateContract.methods.issueCertificate(owner, title, hash).send({ gasPrice: this.gasPrice });
 
     if (issueResult.status && issueResult.events['CertificateStored'] !== null) {
       return new Result(true);
@@ -93,10 +95,11 @@ export class CertificateApi {
 
   async setTrustStatus(issuer) {
     try {
+      console.log(issuer);
       if (issuer.trusted) {
-        await this.certificateContract.methods.addIssuer(issuer.address, issuer.organization).send();
+        await this.certificateContract.methods.addIssuer(issuer.address, issuer.organization).send({ gasPrice: this.gasPrice });
       } else {
-        await this.certificateContract.methods.revokeIssuer(issuer.address, issuer.organization).send();
+        await this.certificateContract.methods.revokeIssuer(issuer.address, issuer.organization).send({ gasPrice: this.gasPrice });
       }
       return new Result(true);
     } catch (e) {
