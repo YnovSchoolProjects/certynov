@@ -38,9 +38,8 @@ export class CertificateApi {
 
   async authenticateCertificate({ hash, owner }) {
     const authResult = await this.certificateContract.methods.authenticateHash(hash, owner).call();
-    console.log(authResult);
 
-    if (authResult.authenticated) {
+    if (authResult !== null && authResult.authenticated) {
       const certificate = await this.fetchCertificate(authResult.authenticatedCertificateId);
       return new Result(true, certificate);
     }
@@ -53,6 +52,18 @@ export class CertificateApi {
 
     const ownedCertificatesIds = await this.certificateContract.methods.getOwnedCertificatesId().call() || [];
     for (let certId of ownedCertificatesIds) {
+      let certificate = await this.fetchCertificate(certId);
+      certificates.push(certificate);
+    }
+
+    return certificates;
+  }
+
+  async fetchIssuedCertificates() {
+    const certificates = [];
+
+    const issuedCertificatesIds = await this.certificateContract.methods.getIssuedCertificates().call() || [];
+    for (let certId of issuedCertificatesIds) {
       let certificate = await this.fetchCertificate(certId);
       certificates.push(certificate);
     }

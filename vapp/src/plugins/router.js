@@ -28,6 +28,15 @@ const router = new VueRouter({
       }
     },
     {
+      path: '/certificates',
+      name: 'certificates',
+      component: () => import('../views/certificates/Certificates.vue'),
+      meta: {
+        requireWallet: true,
+        requireRole: [],
+      }
+    },
+    {
       path: '/',
       name: 'authenticate',
       component: () => import('../views/Authenticate.vue'),
@@ -64,13 +73,20 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   await store.dispatch('eth/initStore');
 
-  if (to.matched.some(record => record.meta.requireWallet) && store.getters['eth/hasAccount']) {
-    const ownedRoles = store.getters['eth/certs/getOwnedRoles'];
+  if (to.matched.some(record => record.meta.requireWallet)) {
+    if (store.getters['eth/hasAccount']) {
+      const ownedRoles = store.getters['eth/certs/getOwnedRoles'];
 
-    if (to.matched.some(record => record.meta.requireRole !== []) && to.matched.some(record => ownedRoles.includes(record.meta.requireRole))) {
+      if (to.matched.some(record => record.meta.requireRole !== [])) {
+        if (to.matched.some(record => ownedRoles.includes(record.meta.requireRole))) {
+          next();
+        } else {
+          next({ name: 'authenticate'});
+        }
+      }
       next();
     } else {
-      next({ name: 'authenticate'});
+      next({ name: 'authenticate'})
     }
   } else {
     next();

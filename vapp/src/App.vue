@@ -10,6 +10,7 @@
           <MdTooltip>Copy to clipboard</MdTooltip>
         </span>
         <MdButton :to="{ name: 'authenticate' }">Authenticate</MdButton>
+        <MdButton v-if="getAccount !== ''" :to="{ name: 'certificates' }">Certificates</MdButton>
         <MdButton v-if="isOwner" :to="{ name: 'issuers' }">Issuers</MdButton>
         <MdButton v-if="isIssuer" :to="{ name: 'certify' }">Certify</MdButton>
       </div>

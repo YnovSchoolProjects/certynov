@@ -1,18 +1,19 @@
 import { CertificateApi } from "../../../services/Certificate";
-import {Result} from "../../../services/Result";
 
 const ethState = {
   ownedRoles: [],
   ownedCertificates: [],
+  issuedCertificates: [],
   issuers: [],
   certificateApi: null,
   initialized: false,
 };
 
 const mutations = {
-  INIT: (state, { certificates, roles }) => {
+  INIT: (state, { owned, issued, roles }) => {
     state.ownedRoles = roles;
-    state.ownedCertificates = certificates;
+    state.ownedCertificates = owned;
+    state.issuedCertificates = issued;
     state.initialized = true;
   },
   API: (state, { certificateApi }) => {
@@ -45,9 +46,10 @@ const actions = {
       commit('API', { certificateApi });
 
       const roles = await certificateApi.fetchOwnedRoles();
-      const certificates = await certificateApi.fetchOwnedCertificates();
+      const owned = await certificateApi.fetchOwnedCertificates();
+      const issued = await certificateApi.fetchIssuedCertificates();
 
-      commit('INIT', { certificates, roles });
+      commit('INIT', { owned, issued, roles });
     }
   },
   async fetchIssuers({ state, commit, rootGetters }, force = false) {
@@ -80,6 +82,7 @@ const actions = {
 const getters = {
   getOwnedRoles: state => state.ownedRoles,
   getOwnedCertificates: state => state.ownedCertificates,
+  getIssuedCertificates: state => state.issuedCertificates,
   getIssuers: state => state.issuers,
   getApi: state => state.certificateApi,
   isInitialized: state => state.initialized,
