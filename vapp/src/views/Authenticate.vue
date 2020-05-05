@@ -17,7 +17,7 @@
                             <md-input v-model="hash">test</md-input>
                         </md-field>
                         <span>Provide file hash or directly the file</span>
-                        <md-divider></md-divider>
+                        <md-divider class="divider"></md-divider>
                         <md-field>
                             <label>File</label>
                             <md-file v-model="file" @md-change="fileEmitted" :disabled="hashing"/>
@@ -29,8 +29,11 @@
                             <md-input v-model="address"></md-input>
                         </md-field>
                     </div>
-                    <div class="md-layout-item md-size-85"></div>
-                    <div class="md-layout-item md-size-15">
+                    <div class="md-layout-item md-size-75"></div>
+                    <div class="md-layout-item md-size-25">
+                        <md-button class="md-accent" @click="reset">
+                            Reset
+                        </md-button>
                         <md-button @click="authenticateCertificate">
                             Authenticate
                         </md-button>
@@ -95,6 +98,11 @@
                 this.hashing = true;
                 this.hash = await this.hashFile(file);
                 this.hashing = false;
+            },
+            reset() {
+                this.hash = null;
+                this.file = null;
+                this.address= null;
             }
         }
     }
@@ -103,5 +111,9 @@
 <style scoped>
     .icon::after {
         background-color: transparent !important;
+    }
+
+    .divider {
+        margin-bottom: 2vh;
     }
 </style>
