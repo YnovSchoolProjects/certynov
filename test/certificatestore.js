@@ -1,6 +1,29 @@
 const CertificateStore = artifacts.require('CertificateStore');
 
 contract('Certificate Store : Overlay', async accounts => {
+  describe('issued certificates fetch process', async () => {
+    it('should be able to fetch issued certificate : no certificate', async () => {
+      const instance = await CertificateStore.deployed();
+
+      await instance.addIssuer(accounts[8], 'CertifY', { from: accounts[0] });
+      const issuedCertificates = await instance.getIssuedCertificates.call({  from: accounts[8] });
+
+      assert.equal(issuedCertificates.length, 0);
+    });
+
+    it('should be able to fetch issued certificate : one issued certificate', async () => {
+      const instance = await CertificateStore.deployed();
+
+      let issuedCertificates = await instance.getIssuedCertificates.call({ from: accounts[8] });
+      assert.equal(issuedCertificates.length, 0);
+
+      await instance.issueCertificate(accounts[1], 'test certificate', 'a hashed certificate content', { from: accounts[8] });
+
+      issuedCertificates = await instance.getIssuedCertificates.call({ from: accounts[8] });
+      assert.equal(issuedCertificates.length, 1);
+    });
+  });
+
   describe('certificate fetch process', async () => {
     it('should be able to fetch existing certificat by id', async () => {
       const instance = await CertificateStore.deployed();

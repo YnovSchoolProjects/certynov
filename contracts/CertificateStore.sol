@@ -29,6 +29,23 @@ contract CertificateStore is CertificateStoreCore {
     }
 
     /**
+    * @dev Returns
+    */
+    function getIssuedCertificates() public view onlyTrustedIssuer returns (uint[] memory issuedCertificate) {
+        uint[] memory _issuedCertificate = new uint[](issuedCertificateCount[msg.sender]);
+        uint current = 0;
+
+        for (uint i = 0; i < certificates.length && current < _issuedCertificate.length; i++) {
+            if (certificates[i].issuer == msg.sender) {
+                _issuedCertificate[current] = i;
+                current++;
+            }
+        }
+
+        return _issuedCertificate;
+    }
+
+    /**
     * @dev Returns all issuers
     */
     function getIssuers() public view onlyOwner returns (Issuer[] memory) {
