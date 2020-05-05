@@ -3,6 +3,6 @@ import CertificateStoreContract from '../contracts/CertificateStore';
 export const contracts = {
   CertificateStore: {
     abi: CertificateStoreContract.abi,
-    address: '0x8a5Abdf85e0486F5D9FA0943E2a24E7F8151A0e2'
+    address: '0x69E9D933AE4A0Be5d905662255EBb26fAF7920FF'
   }
 };
