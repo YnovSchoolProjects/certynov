@@ -1,4 +1,6 @@
-# certynov
+# Ynov - M1 Elective Blockchain
+
+## Projet : certynov
 
 ### Development environment setup:
 
